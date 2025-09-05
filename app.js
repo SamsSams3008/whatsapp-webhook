@@ -1,53 +1,37 @@
+// Import Express.js
 const express = require('express');
-const fetch = require('node-fetch');
 
+// Create an Express app
 const app = express();
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Set port and verify_token
 const port = process.env.PORT || 3000;
+const verifyToken = process.env.VERIFY_TOKEN;
 
-// GET para verificar webhook con Meta
+// Route for GET requests
 app.get('/', (req, res) => {
   const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
 
-  if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+  if (mode === 'subscribe' && token === verifyToken) {
     console.log('WEBHOOK VERIFIED');
     res.status(200).send(challenge);
   } else {
-    console.log('Webhook no verificado');
     res.status(403).end();
   }
 });
 
-// POST para enviar mensaje de prueba a n8n
-app.post('/', async (req, res) => {
-  console.log("Webhook llamado. Enviando mensaje de prueba a n8n...");
-
-  const n8nWebhookURL = 'https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive';
-
-  const body = {
-    messages: [
-      {
-        from: "test-user",
-        text: { body: "mensaje de prueba" }
-      }
-    ]
-  };
-
-  try {
-    const response = await fetch(n8nWebhookURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    console.log('✅ Mensaje de prueba enviado a n8n. Status:', response.status);
-  } catch (err) {
-    console.error('❌ Error enviando mensaje de prueba a n8n:', err);
-  }
-
-  res.status(200).send("Mensaje de prueba procesado.");
+// Route for POST requests
+app.post('/', (req, res) => {
+  const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  console.log(`\n\nWebhook received ${timestamp}\n`);
+  console.log(JSON.stringify(req.body, null, 2));
+  res.status(200).end();
 });
 
+// Start the server
 app.listen(port, () => {
-  console.log(`Servidor escuchando en puerto ${port}`);
+  console.log(`\nListening on port ${port}\n`);
 });
