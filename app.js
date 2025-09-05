@@ -39,17 +39,34 @@ app.post('/', async (req, res) => {
     console.warn('No se encontraron mensajes en el body:', err);
   }
 
-  // --- Enviar a n8n ---
-  try {
-    await fetch('https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
-    });
-    console.log('✅ Mensaje(s) enviado(s) a n8n correctamente:', messages);
-  } catch (err) {
-    console.error('❌ Error enviando a n8n:', err);
-  }
+  // Importar fetch (si usas Node.js >= 18, fetch ya viene, si no instala node-fetch)
+const fetch = require('node-fetch'); // si Node <18
+
+// URL de tu Webhook en n8n
+const n8nWebhookURL = 'https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive';
+
+// Crear el body del mensaje
+const body = {
+  messages: [
+    {
+      from: "test-user",
+      text: { body: "mensaje de prueba" }
+    }
+  ]
+};
+
+// Hacer POST a n8n
+fetch(n8nWebhookURL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body)
+})
+.then(res => {
+  console.log('Status code:', res.status);
+  return res.text();
+})
+.then(data => console.log('Respuesta de n8n:', data))
+.catch(err => console.error('Error enviando a n8n:', err));
 
   res.status(200).end();
 });
