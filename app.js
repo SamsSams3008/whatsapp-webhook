@@ -33,10 +33,12 @@ app.post('/', async (req, res) => {
   // --- Enviar mensaje a n8n ---
   try {
     await fetch('https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
-    });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: req.body.messages // Asegúrate que sea un array con los mensajes
+    })
+  });
     console.log('Mensaje enviado a n8n');
   } catch (err) {
     console.error('Error enviando a n8n:', err);
