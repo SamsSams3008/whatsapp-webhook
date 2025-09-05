@@ -1,5 +1,6 @@
 // Import Express.js
 const express = require('express');
+const fetch = require('node-fetch'); // <- agrega esto
 
 // Create an Express app
 const app = express();
@@ -24,10 +25,23 @@ app.get('/', (req, res) => {
 });
 
 // Route for POST requests
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
   console.log(JSON.stringify(req.body, null, 2));
+
+  // --- Enviar mensaje a n8n ---
+  try {
+    await fetch('https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive', { // <- tu URL de Webhook n8n
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    console.log('Mensaje enviado a n8n');
+  } catch (err) {
+    console.error('Error enviando a n8n:', err);
+  }
+
   res.status(200).end();
 });
 
