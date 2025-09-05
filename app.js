@@ -1,18 +1,18 @@
-// Import Express.js
+// Import Express.js y fetch
 const express = require('express');
-const fetch = require('node-fetch'); // <- agrega esto
+const fetch = require('node-fetch'); // Asegúrate de instalar node-fetch
 
-// Create an Express app
+// Crear app de Express
 const app = express();
 
-// Middleware to parse JSON bodies
+// Middleware para parsear JSON
 app.use(express.json());
 
-// Set port and verify_token
+// Configuración
 const port = process.env.PORT || 3000;
-const verifyToken = process.env.VERIFY_TOKEN;
+const verifyToken = process.env.VERIFY_TOKEN; // el mismo que pondrás en Meta
 
-// Route for GET requests
+// GET para verificar webhook con Meta
 app.get('/', (req, res) => {
   const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
 
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   }
 });
 
-// Route for POST requests
+// POST para recibir mensajes de WhatsApp
 app.post('/', async (req, res) => {
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
@@ -32,7 +32,7 @@ app.post('/', async (req, res) => {
 
   // --- Enviar mensaje a n8n ---
   try {
-    await fetch('https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive', { // <- tu URL de Webhook n8n
+    await fetch('https://santoro.app.n8n.cloud/webhook-test/whatsapp-receive', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body)
@@ -45,7 +45,7 @@ app.post('/', async (req, res) => {
   res.status(200).end();
 });
 
-// Start the server
+// Iniciar servidor
 app.listen(port, () => {
   console.log(`\nListening on port ${port}\n`);
 });
