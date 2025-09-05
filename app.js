@@ -39,6 +39,7 @@ app.post('/', async (req, res) => {
       messages: req.body.messages // Asegúrate que sea un array con los mensajes
     })
   });
+  });
     console.log('Mensaje enviado a n8n');
   } catch (err) {
     console.error('Error enviando a n8n:', err);
